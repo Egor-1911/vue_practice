@@ -1,5 +1,3 @@
-
-
 Vue.component('product', {
     props: {
         premium: {
@@ -8,44 +6,46 @@ Vue.component('product', {
         }
     },
     template: `
-    <div class="product">
-        <div class="product-image">
-            <img :src="image" :alt="altText"/>
-        </div>
+   <div class="product">
+    <div class="product-image">
+           <img :src="image" :alt="altText"/>
+       </div>
 
-        <div class="product-info">
-            <h1>{{ title }}</h1>
-            <p v-if="inStock">In stock</p>
-            <p v-else>Out of Stock</p>
-<!--            <ul>-->
-<!--                <li v-for="detail in details">{{ detail }}</li>-->
-<!--            </ul>-->
-            
-            <p>Shipping: {{ shipping }}</p>
-            
-            <div
-                    class="color-box"
-                    v-for="(variant, index) in variants"
-                    :key="variant.variantId"
-                    :style="{ backgroundColor:variant.variantColor }"
-                    @mouseover="updateProduct(index)"
-            ></div>
-            <div class="cart">
-            <p>Cart({{ cart }})</p>
-            </div>
+       <div class="product-info">
+           <h1>{{ title }}</h1>
+           <p v-if="inStock">In stock</p>
+           <p v-else>Out of Stock</p>
+           <ul>
+               <li v-for="detail in details">{{ detail }}</li>
+           </ul>
+          <p>Shipping: {{ shipping }}</p>
+           <div
+                   class="color-box"
+                   v-for="(variant, index) in variants"
+                   :key="variant.variantId"
+                   :style="{ backgroundColor:variant.variantColor }"
+                   @mouseover="updateProduct(index)"
+           ></div>
+          
 
-            <button
-                v-on:click="addToCart"
-                :disabled="!inStock"
-                :class="{ disabledButton: !inStock }"
-            >
-            Add to cart
-            </button>
-            
-        </div>
+<!--           <div class="cart">-->
+<!--               <p>Cart({{ cart }})</p>-->
+<!--           </div>-->
 
-        
-    </div>
+           <button
+                   v-on:click="addToCart"
+                   :disabled="!inStock"
+                   :class="{ disabledButton: !inStock }"
+           >
+               Add to cart
+           </button>
+           
+           <button v-on:click="removeFromCart">
+                Remove from cart
+           </button>
+       
+       </div>
+   </div>
  `,
     data() {
         return {
@@ -68,16 +68,19 @@ Vue.component('product', {
                     variantQuantity: 0
                 }
             ],
-            cart: 0
         }
     },
     methods: {
         addToCart() {
-            this.cart += 1
+            this.$emit('add-to-cart', this.variants[this.selectedVariant].variantId);
         },
+
         updateProduct(index) {
             this.selectedVariant = index;
             console.log(index);
+        },
+        removeFromCart() {
+            this.$emit('remove-from-cart', this.variants[this.selectedVariant].variantId);
         }
     },
     computed: {
@@ -87,7 +90,7 @@ Vue.component('product', {
         image() {
             return this.variants[this.selectedVariant].variantImage;
         },
-        inStock(){
+        inStock() {
             return this.variants[this.selectedVariant].variantQuantity
         },
         shipping() {
@@ -97,35 +100,31 @@ Vue.component('product', {
                 return 2.99
             }
         }
-
-    }
-})
-
-Vue.component('product-details', {
-    template: `
-    <ul>
-         <li v-for="detail in details">{{ detail }}</li>
-    </ul>
- `,
-    data() {
-        return {
-            details: ['80% cotton', '20% polyester', 'Gender-neutral']
-        }
-    },
-    methods: {
-        // тут будут методы
-    },
-    computed: {
-        // тут будут вычисляемые свойства
     }
 })
 
 let app = new Vue({
     el: '#app',
     data: {
-        premium: true
+        premium: true,
+        cart: []
+    },
+    methods: {
+        updateCart(id) {
+            this.cart.push(id);
+        },
+        removeFromCart(id) {
+            const index = this.cart.indexOf(id);
+            if (index >= 0) {
+                this.cart.pop();
+            }
+        }
     }
+
 })
+
+
+
 
 
 
